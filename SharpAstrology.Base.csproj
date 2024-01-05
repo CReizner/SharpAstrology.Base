@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>SharpAstrology</RootNamespace>
+        <ImplicitUsings>false</ImplicitUsings>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PackageId>SharpAstrology.Base</PackageId>
+        <PackageTags>Astrology</PackageTags>
+        <Version>0.8.0</Version>
+        <Authors>Christian Reizner</Authors>
+        <IsPackable>true</IsPackable>
+        <Description>
+            This package provides enums and data types that are fundamental to all astrological systems. 
+            In addition, there are some utility functions that are often used in the SharpAstrology packages. 
+            The most important part in this module is the IEphemerides interface, 
+            which must be implemented before any other SharpAstrology package can be used.
+        </Description>
+        <RepositoryUrl>https://github.com/CReizner/SharpAstrology/tree/main/SharpAstrology.Base</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/CReizner/SharpAstrology/tree/main/SharpAstrology.Base</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="$(PackageReadmeFile)" CopyToOutputDirectory="Always"/>
+    </ItemGroup>
+
+</Project>
