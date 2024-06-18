@@ -1,6 +1,6 @@
 namespace SharpAstrology.Enums;
 
-public enum ZodiacSigns
+public enum Zodiac
 {
     Aries = 0,
     Taurus = 1,

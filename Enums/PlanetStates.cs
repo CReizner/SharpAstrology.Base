@@ -4,7 +4,7 @@ public enum PlanetStates
 {
     None,
     Dominion,
-    Exalted,
+    Exaltation,
     Detriment,
     Fall
 }

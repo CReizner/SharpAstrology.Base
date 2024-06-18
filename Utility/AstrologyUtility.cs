@@ -6,7 +6,7 @@ using SharpAstrology.Enums;
 
 namespace SharpAstrology.Utility;
 
-public static class AstrologyUtility
+public static partial class AstrologyUtility
 {
     /// <summary>
     /// Converts a Julian date to a DateTime object.
@@ -116,7 +116,7 @@ public static class AstrologyUtility
     /// </summary>
     /// <param name="longitude">The celestial objects longitude value.</param>
     /// <returns>The zodiac sign corresponding to the given longitude.</returns>
-    public static ZodiacSigns ZodiacSignOf(double longitude) => (ZodiacSigns)(longitude / 30);
+    public static Zodiac ZodiacSignOf(double longitude) => (Zodiac)(longitude / 30);
     
     /// <summary>
     /// Determines the house positions for each planet based on their longitudes and house cusp positions.

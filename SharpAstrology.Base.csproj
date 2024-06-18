@@ -11,7 +11,7 @@
     <PropertyGroup>
         <PackageId>SharpAstrology.Base</PackageId>
         <PackageTags>Astrology</PackageTags>
-        <Version>0.8.0</Version>
+        <Version>0.9.0</Version>
         <Authors>Christian Reizner</Authors>
         <IsPackable>true</IsPackable>
         <Description>
