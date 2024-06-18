@@ -144,7 +144,7 @@ var chart = new AstrologyChart(date, eph, [Planets.Sun, Planets.Moon, Planets.Ma
 
 // Houses
 Console.WriteLine(chart.HousePositions is null ? "No houses available" : "Houses available");
-// Output: Houses available
+// Output: No houses available
 
 // Planet positions
 foreach (var planet in chart.SupportedObjects)
