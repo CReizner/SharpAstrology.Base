@@ -49,15 +49,21 @@ public sealed class AstrologyChart
     /// Retrieves the position of the specified planet.
     /// </summary>
     /// <param name="planet">The planet for which to retrieve the position.</param>
+    /// <param name="regardingConstellation">Set to true, if you want the longitude relative to the start of the constellation Aries.</param>
     /// <returns>
     /// A <see cref="PlanetPosition"/> object representing the position of the specified planet.
     /// </returns>
     /// <exception cref="CelestialObjectNotSupportedException">
     /// Thrown if the specified planet is not supported in this chart.
     /// </exception>
-    public PlanetPosition PositionOf(Planets planet)
+    public PlanetPosition PositionOf(Planets planet, bool regardingConstellation=false)
     {
         if (!_planetsPositions.TryGetValue(planet, out var position)) throw new CelestialObjectNotSupportedException($"{planet} not supported in this chart.");
+        if (regardingConstellation)
+        {
+            position.Longitude -= Ayanamsa;
+        }
+
         return position;
     }
 
