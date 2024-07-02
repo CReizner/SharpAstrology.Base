@@ -12,6 +12,7 @@ namespace SharpAstrology.DataModels;
 
 public sealed class AstrologyChart
 {
+    public DateTime PointInTime { get; }
     public HousePosition? HousePositions { get; }
     public Planets[] SupportedObjects { get; }
     public double Ayanamsa { get; }
@@ -21,6 +22,7 @@ public sealed class AstrologyChart
     #region Constructor
     public AstrologyChart(DateTime pointInTime, IEphemerides eph, IEnumerable<Planets>? includePlanets=null)
     {
+        PointInTime = pointInTime;
         SupportedObjects = includePlanets?.ToArray() ??
         [
             Planets.Sun, Planets.Moon, Planets.Mercury, Planets.Venus, Planets.Mars,
@@ -33,6 +35,7 @@ public sealed class AstrologyChart
 
     public AstrologyChart(DateTime pointInTime, IEphemerides eph, double latitude, double longitude, IEnumerable<Planets>? includePlanets=null)
     {
+        PointInTime = pointInTime;
         SupportedObjects = includePlanets?.ToArray() ??
         [
             Planets.Sun, Planets.Moon, Planets.Mercury, Planets.Venus, Planets.Mars,
