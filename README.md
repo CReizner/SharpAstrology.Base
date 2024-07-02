@@ -5,10 +5,10 @@ In addition, there are some utility functions that are often used in the SharpAs
 The most important part in this module is the IEphemerides interface, 
 which must be implemented before any other SharpAstrology package can be used.
 
-# SharpAstrology Packages
+## SharpAstrology Packages
 | Package                                                                                                                | Version | Description                              | Licence  |
 |:-----------------------------------------------------------------------------------------------------------------------|:-------:|:-----------------------------------------|:--------:|
-| [SharpAstrology.Base](https://github.com/CReizner/SharpAstrology.Base)                                                 |  0.9.0  | Base library                             |   MIT    |
+| [SharpAstrology.Base](https://github.com/CReizner/SharpAstrology.Base)                                                 | 0.10.0  | Base library                             |   MIT    |
 | [SharpAstrology.SwissEph](https://github.com/CReizner/SharpAstrology.SwissEph)                                         |  0.2.1  | Ephemerides package based on SwissEphNet | AGPL-3.0 |
 | [SharpAstrology.HumanDesign](https://github.com/CReizner/SharpAstrology.HumanDesign)                                   |  1.1.0  | Extensions for the Human Design system   |   MIT    |
 | [SharpAstrology.HumanDesign.BlazorComponents](https://github.com/CReizner/SharpAstrology.HumanDesign.BlazorComponents) |  0.2.1  | Human Design charts as Blazor components |   MIT    |
