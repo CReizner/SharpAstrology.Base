@@ -10,7 +10,7 @@ using SharpAstrology.Utility;
 
 namespace SharpAstrology.DataModels;
 
-public sealed class AstrologyChart
+public sealed class AstrologyChart : IAstrologyChart
 {
     public DateTime PointInTime { get; }
     public HousePosition? HousePositions { get; }
@@ -46,8 +46,12 @@ public sealed class AstrologyChart
         Ayanamsa = eph.Ayanamsa(pointInTime);
         HousePositions = eph.HouseCuspPositions(pointInTime, latitude, longitude);
     }
+    
     #endregion
 
+    public IDictionary<Planets, PlanetPosition> PlanetsPositions => _planetsPositions.ToDictionary();
+    public bool HousesAvailable => HousePositions is not null;
+    
     /// <summary>
     /// Retrieves the position of the specified planet.
     /// </summary>
@@ -59,7 +63,7 @@ public sealed class AstrologyChart
     /// <exception cref="CelestialObjectNotSupportedException">
     /// Thrown if the specified planet is not supported in this chart.
     /// </exception>
-    public PlanetPosition PositionOf(Planets planet, bool regardingConstellation=false)
+    public PlanetPosition PositionOf(Planets planet, bool regardingConstellation)
     {
         if (!_planetsPositions.TryGetValue(planet, out var position)) throw new CelestialObjectNotSupportedException($"{planet} not supported in this chart.");
         if (regardingConstellation)
@@ -67,6 +71,13 @@ public sealed class AstrologyChart
             position.Longitude -= Ayanamsa;
         }
 
+        return position;
+    }
+
+    public PlanetPosition PositionOf(Planets planet)
+    {
+        if (!_planetsPositions.TryGetValue(planet, out var position)) throw new CelestialObjectNotSupportedException($"{planet} not supported in this chart.");
+        
         return position;
     }
 
