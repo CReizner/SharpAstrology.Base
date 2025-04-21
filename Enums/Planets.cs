@@ -18,6 +18,15 @@ public enum Planets
         SouthNode = 11,
         Chiron = 12,
         Earth = 13,
+        Pholus = 14,
+        Ceres = 15,
+        Pallas = 16,
+        Juno = 17,
+        Vesta = 18,
+        /// <summary>
+        /// Lilith the asteroid, not dark moon lilith.
+        /// </summary>
+        Lilith = 19
 }
 
 public static class PlanetsExtensionMethods
