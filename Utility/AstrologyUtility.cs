@@ -77,21 +77,17 @@ public static partial class AstrologyUtility
     /// <param name="deg2">The second degree value to add.</param>
     /// <returns>The result of adding deg1 and deg2, considering the circular nature of degrees.</returns>
     public static double AddDegree(double deg1, double deg2) => deg1 + deg2 >= 360 ? deg1 - 360 + deg2 : deg1 + deg2;
-        
+
     /// <summary>
     /// Calculates the angular difference between two degrees, considering the circular nature of degrees.
     /// </summary>
-    /// <param name="p1">The first degree value.</param>
-    /// <param name="p2">The second degree value.</param>
+    /// <param name="deg1">The first degree value.</param>
+    /// <param name="deg2">The second degree value.</param>
     /// <returns>
-    /// The angular difference between p1 and p2, considering the circular nature of degrees.
+    /// The angular difference between deg1 and deg2, considering the circular nature of degrees.
     /// The result is in the range [-180, 180].
     /// </returns>
-    public static double AngleDifference(double p1, double p2)
-    {
-        var num = _normalizeDegree(p1 - p2);
-        return num >= 180.0 ? num - 360.0 : num;
-    }
+    public static double AngleDifference(double deg1, double deg2) => DifferenceDegreesSigned(deg1, deg2);
         
     /// <summary>
     /// Calculates the house position of the planet based on the given planets longitude and the house cusp positions.
@@ -132,14 +128,55 @@ public static partial class AstrologyUtility
         return planetPosition.ToDictionary(p => p.Key,
             p => PlanetsHousePosition(p.Value.Longitude, housePositions));
     }
-            
-    private static double _normalizeDegree(double x)
+    
+    /// <summary>
+    /// Reduces an angle in degrees to the half-open interval <c>[0, 360)</c>.
+    /// </summary>
+    /// <param name="deg">The degree to be normalized.</param>
+    /// <returns>
+    /// The normalized degree.
+    /// </returns>
+    public static double NormalizeDegrees(double deg)
     {
-        var num = x % 360.0;
-        if (Math.Abs(num) < 1E-13)
-            num = 0.0;
-        if (num < 0.0)
-            num += 360.0;
-        return num;
+        var y = deg % 360.0;
+        if (Math.Abs(y) < 1E-13) y = 0.0;
+        if (y < 0.0) y += 360.0;
+        return y;
+    }
+
+    /// <summary>
+    /// Unsigned distance in degrees, normalized to <c>[0, 360)</c>.
+    /// </summary>
+    /// <param name="deg1">The first degree value.</param>
+    /// <param name="deg2">The second degree value.</param>
+    public static double DifferenceDegreesUnsigned(double deg1, double deg2) => NormalizeDegrees(deg1 - deg2);
+
+    /// <summary>
+    /// Calculates the angular difference between two degrees, considering the circular nature of degrees.
+    /// </summary>
+    /// <param name="deg1">The first degree value.</param>
+    /// <param name="deg2">The second degree value.</param>
+    /// <returns>
+    /// The angular difference between deg1 and deg2, considering the circular nature of degrees.
+    /// The result is in the range [-180, 180].
+    /// </returns>
+    public static double DifferenceDegreesSigned(double deg1, double deg2)
+    {
+        var d = NormalizeDegrees(deg1 - deg2);
+        return d >= 180.0 ? d - 360.0 : d;
+    }
+
+    /// <summary>
+    /// Midpoint between two angles in degrees, taken along the short arc.
+    /// </summary>
+    /// <param name="deg1">The first degree value.</param>
+    /// <param name="deg2">The second degree value.</param>
+    /// <returns>
+    /// The angular midpoint between the two given degrees deg1 and deg2.
+    /// </returns>
+    public static double DegreeMidpoint(double deg1, double deg2)
+    {
+        var d = DifferenceDegreesSigned(deg1, deg2);
+        return NormalizeDegrees(deg2 + d / 2.0);
     }
 }
