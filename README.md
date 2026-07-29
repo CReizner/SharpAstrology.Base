@@ -6,15 +6,28 @@ The most important part in this module is the IEphemerides interface,
 which must be implemented before any other SharpAstrology package can be used.
 
 ## SharpAstrology Packages
-| Package                                                                                                                | Description                                   | Licence  |
-|:-----------------------------------------------------------------------------------------------------------------------|:----------------------------------------------|:--------:|
-| [SharpAstrology.Base](https://github.com/CReizner/SharpAstrology.Base)                                                 | Base library                                  |   MIT    |
-| [SharpAstrology.SwissEph](https://github.com/CReizner/SharpAstrology.SwissEph)                                         | Ephemerides package based on SwissEphNet      | AGPL-3.0 |
-| [SharpAstrology.HumanDesign](https://github.com/CReizner/SharpAstrology.HumanDesign)                                   | Extensions for the Human Design system        |   MIT    |
-| [SharpAstrology.HumanDesign.BlazorComponents](https://github.com/CReizner/SharpAstrology.HumanDesign.BlazorComponents) | Human Design charts as Blazor components      |   MIT    |
-| [SharpAstrology.Vedic](https://github.com/CReizner/SharpAstrology.Vedic)                                               | Extensions for Vedic astrology systems        |   MIT    |
-| [SharpAstrology.West](https://github.com/CReizner/SharpAstrology.West)                                                 | Extensions for western astrology systems      |   MIT    |
-| [SharpAstrology.West.BlazorComponents](https://github.com/CReizner/SharpAstrology.West.BlazorComponents)               | Western astrology charts as Blazor components |   MIT    |
+| Package                                                                                                                | Description                                            | Licence  |
+|:-----------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------|:--------:|
+| [SharpAstrology.Base](https://github.com/CReizner/SharpAstrology.Base)                                                 | Base library                                           |   MIT    |
+| [SharpAstrology.SwissEph](https://github.com/CReizner/SharpAstrology.SwissEph)                                         | Ephemerides package based on SwissEphNet               | AGPL-3.0 |
+| [SharpAstrology.Symbols.BlazorComponents](https://github.com/CReizner/SharpAstrology.Symbols.BlazorComponents)         | Astrological symbols as Blazor components              |   MIT    |
+| [SharpAstrology.HumanDesign](https://github.com/CReizner/SharpAstrology.HumanDesign)                                   | Extensions for the Human Design system                 |   MIT    |
+| [SharpAstrology.HumanDesign.BlazorComponents](https://github.com/CReizner/SharpAstrology.HumanDesign.BlazorComponents) | Human Design charts as Blazor components               |   MIT    |
+| [SharpAstrology.Vedic](https://github.com/CReizner/SharpAstrology.Vedic)                                               | Extensions for Vedic astrology systems                 |   MIT    |
+| [SharpAstrology.Vedic.BlazorComponents](https://github.com/CReizner/SharpAstrology.Vedic.BlazorComponents)             | Vedic astrology charts as Blazor components            |   MIT    |
+| [SharpAstrology.West](https://github.com/CReizner/SharpAstrology.West)                                                 | Extensions for western astrology systems               |   MIT    |
+| [SharpAstrology.West.BlazorComponents](https://github.com/CReizner/SharpAstrology.West.BlazorComponents)               | Western astrology charts as Blazor components          |   MIT    |
+| [SharpAstrology.WebApp](https://github.com/CReizner/SharpAstrology.WebApp)                                             | Blazor Server app built on the SharpAstrology packages | AGPL-3.0 |
+
+## Changes in 0.13.0
+
+`AstrologyChart.PositionOf(planet, regardingConstellation: true)` returns a copy and no longer
+modifies the chart. Up to 0.12.0 it subtracted the ayanamsa on the stored `PlanetPosition`, which
+is a reference the chart keeps. Every call shifted the planet by one ayanamsa, so a second call
+answered differently and every later reader of the chart saw a wrong longitude. The returned
+longitude is now also normalized to `[0, 360)`, so a planet below the ayanamsa no longer yields a
+negative value. The overload without the flag is unchanged and still hands out the stored
+instance.
 
 ## The IEphemerides interface
 The IEphemerides interface is used for all astrological modules of SharpAstrology. 

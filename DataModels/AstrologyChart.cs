@@ -33,7 +33,10 @@ public sealed class AstrologyChart : IAstrologyChart
         Ayanamsa = eph.Ayanamsa(pointInTime);
     }
 
-    public AstrologyChart(DateTime pointInTime, IEphemerides eph, double latitude, double longitude, IEnumerable<Planets>? includePlanets=null)
+    public AstrologyChart(DateTime pointInTime, IEphemerides eph, double latitude, double longitude,
+        IEnumerable<Planets>? includePlanets = null,
+        HouseSystems houseSystem = HouseSystems.Placidus,
+        EphCalculationMode mode = EphCalculationMode.Tropic)
     {
         PointInTime = pointInTime;
         SupportedObjects = includePlanets?.ToArray() ??
@@ -44,7 +47,7 @@ public sealed class AstrologyChart : IAstrologyChart
         ];
         _planetsPositions = eph.PlanetsPosition(SupportedObjects, pointInTime);
         Ayanamsa = eph.Ayanamsa(pointInTime);
-        HousePositions = eph.HouseCuspPositions(pointInTime, latitude, longitude);
+        HousePositions = eph.HouseCuspPositions(pointInTime, latitude, longitude, houseSystem, mode);
     }
     
     #endregion
@@ -59,6 +62,8 @@ public sealed class AstrologyChart : IAstrologyChart
     /// <param name="regardingConstellation">Set to true, if you want the longitude relative to the start of the constellation Aries.</param>
     /// <returns>
     /// A <see cref="PlanetPosition"/> object representing the position of the specified planet.
+    /// If <paramref name="regardingConstellation"/> is true, the returned object is a copy and
+    /// its longitude lies in the interval <c>[0, 360)</c>.
     /// </returns>
     /// <exception cref="CelestialObjectNotSupportedException">
     /// Thrown if the specified planet is not supported in this chart.
@@ -66,12 +71,17 @@ public sealed class AstrologyChart : IAstrologyChart
     public PlanetPosition PositionOf(Planets planet, bool regardingConstellation)
     {
         if (!_planetsPositions.TryGetValue(planet, out var position)) throw new CelestialObjectNotSupportedException($"{planet} not supported in this chart.");
-        if (regardingConstellation)
-        {
-            position.Longitude -= Ayanamsa;
-        }
+        if (!regardingConstellation) return position;
 
-        return position;
+        return new PlanetPosition
+        {
+            Longitude = AstrologyUtility.SubtractDegree(position.Longitude, Ayanamsa),
+            Latitude = position.Latitude,
+            Distance = position.Distance,
+            SpeedLongitude = position.SpeedLongitude,
+            SpeedLatitude = position.SpeedLatitude,
+            SpeedDistance = position.SpeedDistance
+        };
     }
 
     public PlanetPosition PositionOf(Planets planet)
