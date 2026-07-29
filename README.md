@@ -19,23 +19,11 @@ which must be implemented before any other SharpAstrology package can be used.
 | [SharpAstrology.West.BlazorComponents](https://github.com/CReizner/SharpAstrology.West.BlazorComponents)               | Western astrology charts as Blazor components          |   MIT    |
 | [SharpAstrology.WebApp](https://github.com/CReizner/SharpAstrology.WebApp)                                             | Blazor Server app built on the SharpAstrology packages | AGPL-3.0 |
 
-## Changes in 0.13.0
-
-`AstrologyChart.PositionOf(planet, regardingConstellation: true)` returns a copy and no longer
-modifies the chart. Up to 0.12.0 it subtracted the ayanamsa on the stored `PlanetPosition`, which
-is a reference the chart keeps. Every call shifted the planet by one ayanamsa, so a second call
-answered differently and every later reader of the chart saw a wrong longitude. The returned
-longitude is now also normalized to `[0, 360)`, so a planet below the ayanamsa no longer yields a
-negative value. The overload without the flag is unchanged and still hands out the stored
-instance.
-
 ## The IEphemerides interface
 The IEphemerides interface is used for all astrological modules of SharpAstrology. 
-SharpAstrology currently only provides one implementation of IEphemerides. 
-This implementation uses SwissEphNet (a C port of the swisseph C library). 
+SharpAstrology currently only provides one implementation of IEphemerides: SharpAstrology.SwissEph a C# rewrite of the swisseph C library.
 As swisseph has a dual license system, which is in the free version not compatible with SharpAstrology, 
-the implementation is not an integral part of the base module. There may be other implementations of 
-IEphemerides in the future.
+the implementation is not an integral part of the base module.
 
 ## The AstrologyChart class
 The AstrologyChart class provides essential functions that are used in both Western and Vedic astrology.
