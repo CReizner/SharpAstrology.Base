@@ -11,7 +11,8 @@
     <PropertyGroup>
         <PackageId>SharpAstrology.Base</PackageId>
         <PackageTags>Astrology</PackageTags>
-        <Version>0.13.0</Version>
+        <Version>0.14.0</Version>
+        <PackageReleaseNotes>0.14.0: Breaking. An AstrologyChart stands in exactly one zodiac. The mode is chosen when the chart is built, it reaches the planets, the house cusps and the axes alike, and the chart reports it as CalculationMode. The first constructor, the one without a place, takes the mode as well, so a transit chart can stand in the same zodiac as its radix chart. AstrologyCombineChart passes the mode on and refuses a pair of charts from two zodiacs. Removed: ConstellationOf in all three overloads, PositionOf(planet, regardingConstellation) and StateOf(planet, regardingConstellation) in both overloads. They subtracted the ayanamsa on their own and hid the zodiac of their result. Build the chart with EphCalculationMode.Sidereal and use SignOf, PositionOf and StateOf on it. A sidereal chart also has the better house cusps, because HouseSystems.WholeSign then puts them on the boundaries of the constellations. Ayanamsa stays, as an information about the point in time and not as an instruction.</PackageReleaseNotes>
         <Authors>Christian Reizner</Authors>
         <IsPackable>true</IsPackable>
         <Description>

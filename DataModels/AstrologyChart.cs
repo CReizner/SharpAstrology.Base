@@ -10,79 +10,97 @@ using SharpAstrology.Utility;
 
 namespace SharpAstrology.DataModels;
 
+/// <summary>
+/// A chart of the celestial objects at one point in time, optionally with house cusps for one
+/// place.
+/// </summary>
+/// <remarks>
+/// A chart stands in exactly one zodiac. It is chosen when the chart is built and it holds for
+/// the planets, the house cusps and the axes alike. <see cref="CalculationMode"/> says which one
+/// it is.
+/// </remarks>
 public sealed class AstrologyChart : IAstrologyChart
 {
     public DateTime PointInTime { get; }
     public HousePosition? HousePositions { get; }
     public Planets[] SupportedObjects { get; }
+
+    /// <summary>
+    /// The offset between the tropical and the sidereal zodiac at <see cref="PointInTime"/>.
+    /// </summary>
+    /// <remarks>
+    /// This is an information about the point in time, not an instruction. It is the same number
+    /// for both values of <see cref="CalculationMode"/>. Subtracting it from a longitude of this
+    /// chart is only ever right when the chart stands in <see cref="EphCalculationMode.Tropic"/>.
+    /// </remarks>
     public double Ayanamsa { get; }
+
+    /// <inheritdoc />
+    public EphCalculationMode CalculationMode { get; }
+
+    private static readonly Planets[] DefaultObjects =
+    [
+        Planets.Sun, Planets.Moon, Planets.Mercury, Planets.Venus, Planets.Mars,
+        Planets.Jupiter, Planets.Saturn, Planets.NorthNode, Planets.SouthNode,
+        Planets.Uranus, Planets.Neptune, Planets.Pluto
+    ];
+
     private readonly Dictionary<Planets, PlanetPosition> _planetsPositions;
 
-    
     #region Constructor
-    public AstrologyChart(DateTime pointInTime, IEphemerides eph, IEnumerable<Planets>? includePlanets=null)
+    /// <summary>
+    /// A chart without a place, so without house cusps and axes.
+    /// </summary>
+    /// <param name="pointInTime">The moment the chart is calculated for.</param>
+    /// <param name="eph">The ephemerides the positions come from.</param>
+    /// <param name="includePlanets">
+    /// The objects the chart carries. Defaults to the ten classical planets plus both lunar nodes.
+    /// </param>
+    /// <param name="mode">
+    /// The zodiac of the chart. A chart without a place still needs the choice, because a transit
+    /// chart belongs to a radix chart and the two have to stand in the same zodiac.
+    /// </param>
+    public AstrologyChart(DateTime pointInTime, IEphemerides eph, IEnumerable<Planets>? includePlanets=null,
+        EphCalculationMode mode = EphCalculationMode.Tropic)
     {
         PointInTime = pointInTime;
-        SupportedObjects = includePlanets?.ToArray() ??
-        [
-            Planets.Sun, Planets.Moon, Planets.Mercury, Planets.Venus, Planets.Mars,
-            Planets.Jupiter, Planets.Saturn, Planets.NorthNode, Planets.SouthNode,
-            Planets.Uranus, Planets.Neptune, Planets.Pluto
-        ];
-        _planetsPositions = eph.PlanetsPosition(SupportedObjects, pointInTime);
+        SupportedObjects = includePlanets?.ToArray() ?? DefaultObjects;
+        CalculationMode = mode;
+        _planetsPositions = eph.PlanetsPosition(SupportedObjects, pointInTime, mode);
         Ayanamsa = eph.Ayanamsa(pointInTime);
     }
 
+    /// <summary>
+    /// A chart with house cusps and axes for one place.
+    /// </summary>
+    /// <param name="pointInTime">The moment the chart is calculated for.</param>
+    /// <param name="eph">The ephemerides the positions come from.</param>
+    /// <param name="latitude">The geographic latitude of the place, in degrees.</param>
+    /// <param name="longitude">The geographic longitude of the place, in degrees.</param>
+    /// <param name="includePlanets">
+    /// The objects the chart carries. Defaults to the ten classical planets plus both lunar nodes.
+    /// </param>
+    /// <param name="houseSystem">The house system the cusps are calculated in.</param>
+    /// <param name="mode">
+    /// The zodiac of the chart. It reaches the planets, the house cusps and the axes alike.
+    /// </param>
     public AstrologyChart(DateTime pointInTime, IEphemerides eph, double latitude, double longitude,
         IEnumerable<Planets>? includePlanets = null,
         HouseSystems houseSystem = HouseSystems.Placidus,
         EphCalculationMode mode = EphCalculationMode.Tropic)
     {
         PointInTime = pointInTime;
-        SupportedObjects = includePlanets?.ToArray() ??
-        [
-            Planets.Sun, Planets.Moon, Planets.Mercury, Planets.Venus, Planets.Mars,
-            Planets.Jupiter, Planets.Saturn, Planets.NorthNode, Planets.SouthNode,
-            Planets.Uranus, Planets.Neptune, Planets.Pluto
-        ];
-        _planetsPositions = eph.PlanetsPosition(SupportedObjects, pointInTime);
+        SupportedObjects = includePlanets?.ToArray() ?? DefaultObjects;
+        CalculationMode = mode;
+        _planetsPositions = eph.PlanetsPosition(SupportedObjects, pointInTime, mode);
         Ayanamsa = eph.Ayanamsa(pointInTime);
         HousePositions = eph.HouseCuspPositions(pointInTime, latitude, longitude, houseSystem, mode);
     }
-    
+
     #endregion
 
     public IDictionary<Planets, PlanetPosition> PlanetsPositions => _planetsPositions.ToDictionary();
     public bool HousesAvailable => HousePositions is not null;
-    
-    /// <summary>
-    /// Retrieves the position of the specified planet.
-    /// </summary>
-    /// <param name="planet">The planet for which to retrieve the position.</param>
-    /// <param name="regardingConstellation">Set to true, if you want the longitude relative to the start of the constellation Aries.</param>
-    /// <returns>
-    /// A <see cref="PlanetPosition"/> object representing the position of the specified planet.
-    /// If <paramref name="regardingConstellation"/> is true, the returned object is a copy and
-    /// its longitude lies in the interval <c>[0, 360)</c>.
-    /// </returns>
-    /// <exception cref="CelestialObjectNotSupportedException">
-    /// Thrown if the specified planet is not supported in this chart.
-    /// </exception>
-    public PlanetPosition PositionOf(Planets planet, bool regardingConstellation)
-    {
-        if (!_planetsPositions.TryGetValue(planet, out var position)) throw new CelestialObjectNotSupportedException($"{planet} not supported in this chart.");
-        if (!regardingConstellation) return position;
-
-        return new PlanetPosition
-        {
-            Longitude = AstrologyUtility.SubtractDegree(position.Longitude, Ayanamsa),
-            Latitude = position.Latitude,
-            Distance = position.Distance,
-            SpeedLongitude = position.SpeedLongitude,
-            SpeedLatitude = position.SpeedLatitude,
-            SpeedDistance = position.SpeedDistance
-        };
-    }
 
     public PlanetPosition PositionOf(Planets planet)
     {
@@ -103,20 +121,26 @@ public sealed class AstrologyChart : IAstrologyChart
     }
 
     /// <summary>
-    /// Gets the zodiac sign of the specified planet.
+    /// Gets the division of the specified planet in the zodiac of this chart.
     /// </summary>
-    /// <param name="planet">The planet for which to determine the zodiac sign.</param>
-    /// <returns>The zodiac sign of the specified planet.</returns>
+    /// <param name="planet">The planet for which to determine the division.</param>
+    /// <returns>
+    /// The division the planet stands in. <see cref="CalculationMode"/> says whether that is a sign
+    /// of the tropical zodiac or a constellation of the sidereal one.
+    /// </returns>
     public Zodiac SignOf(Planets planet)
     {
         return AstrologyUtility.ZodiacSignOf(PositionOf(planet).Longitude);
     }
 
     /// <summary>
-    /// Gets the zodiac sign of a specified direction of the cross.
+    /// Gets the division of a specified direction of the cross in the zodiac of this chart.
     /// </summary>
     /// <param name="direction">The direction of the cross (e.g., Ascendant, Midheaven).</param>
-    /// <returns>The zodiac sign corresponding to the specified direction.</returns>
+    /// <returns>
+    /// The division the direction stands in. <see cref="CalculationMode"/> says whether that is a
+    /// sign of the tropical zodiac or a constellation of the sidereal one.
+    /// </returns>
     /// <exception cref="HousesNotAvailableException">Thrown if the house positions are not available.</exception>
     public Zodiac SignOf(Cross direction)
     {
@@ -125,51 +149,20 @@ public sealed class AstrologyChart : IAstrologyChart
     }
 
     /// <summary>
-    /// Gets the zodiac sign of a specified house cusp.
+    /// Gets the division of a specified house cusp in the zodiac of this chart.
     /// </summary>
-    /// <param name="house">The house cusp for which to determine the zodiac sign.</param>
-    /// <returns>The zodiac sign corresponding to the specified house cusp.</returns>
+    /// <param name="house">The house cusp for which to determine the division.</param>
+    /// <returns>
+    /// The division the cusp stands in. <see cref="CalculationMode"/> says whether that is a sign
+    /// of the tropical zodiac or a constellation of the sidereal one.
+    /// </returns>
     /// <exception cref="HousesNotAvailableException">Thrown if the house positions are not available.</exception>
     public Zodiac SignOf(Houses house)
     {
         if (HousePositions is null) throw new HousesNotAvailableException();
         return AstrologyUtility.ZodiacSignOf(HousePositions.HouseCusps[house]);
     }
-    
-    /// <summary>
-    /// Gets the zodiac constellation of the specified planet.
-    /// </summary>
-    /// <param name="planet">The planet for which to determine the zodiac constellation.</param>
-    /// <returns>The zodiac constellation of the specified planet.</returns>
-    public Zodiac ConstellationOf(Planets planet)
-    {
-        return AstrologyUtility.ZodiacSignOf(AstrologyUtility.SubtractDegree(PositionOf(planet).Longitude, Ayanamsa));
-    }
-    
-    /// <summary>
-    /// Gets the zodiac constellation of a specified direction of the cross.
-    /// </summary>
-    /// <param name="direction">The direction if the cross (e.g., Ascendant, Midheaven).</param>
-    /// <returns>The zodiac constellation corresponding to the specified direction.</returns>
-    /// <exception cref="HousesNotAvailableException">Thrown if the house positions are not available.</exception>
-    public Zodiac ConstellationOf(Cross direction)
-    {
-        if (HousePositions is null) throw new HousesNotAvailableException();
-        return AstrologyUtility.ZodiacSignOf(AstrologyUtility.SubtractDegree(HousePositions.Cross[direction], Ayanamsa));
-    }
-    
-    /// <summary>
-    /// Gets the zodiac constellation of a specified house cusp.
-    /// </summary>
-    /// <param name="house">The house cusp for which to determine the zodiac constellation.</param>
-    /// <returns>The zodiac constellation corresponding to the specified house cusp.</returns>
-    /// <exception cref="HousesNotAvailableException">Thrown if the house positions are not available.</exception>
-    public Zodiac ConstellationOf(Houses house)
-    {
-        if (HousePositions is null) throw new HousesNotAvailableException();
-        return AstrologyUtility.ZodiacSignOf(AstrologyUtility.SubtractDegree(HousePositions.HouseCusps[house], Ayanamsa));
-    }
-    
+
     /// <summary>
     /// Determines the motion of the specified planet, indicating whether it is in retrograde or forward motion.
     /// </summary>
@@ -185,38 +178,32 @@ public sealed class AstrologyChart : IAstrologyChart
     }
 
     /// <summary>
-    /// Determines the state of the specified planet. You can choose the state evaluation regarding sign or constellation.
+    /// Determines the state of the specified planet in the zodiac of this chart.
     /// </summary>
     /// <param name="planet">The planet for which to determine the state.</param>
-    /// <param name="regardingConstellation">
-    /// A boolean value indicating whether to consider the planet's constellation (true) or its sign (false).
-    /// </param>
     /// <returns>
     /// A <see cref="PlanetStates"/> value representing the state of the planet based on default astrological rules.
     /// </returns>
     /// <exception cref="CelestialObjectNotSupportedException">Thrown if the planet is not supported in this chart.</exception>
-    public PlanetStates StateOf(Planets planet, bool regardingConstellation=false)
+    public PlanetStates StateOf(Planets planet)
     {
-        return AstrologyDefaults.DefaultStates(planet, regardingConstellation ? ConstellationOf(planet) : SignOf(planet));
+        return AstrologyDefaults.DefaultStates(planet, SignOf(planet));
     }
-    
+
     /// <summary>
-    /// Determines the state of the specified planet using a custom mapping function.
-    /// You can choose the state evaluation regarding sign or constellation.
+    /// Determines the state of the specified planet in the zodiac of this chart, using a custom
+    /// mapping function.
     /// </summary>
     /// <param name="planet">The planet for which to determine the state.</param>
     /// <param name="statesMap">
-    /// A function that maps a planet and a zodiac (constellation or sign) to a <see cref="PlanetStates"/> value.
-    /// </param>
-    /// <param name="regardingConstellation">
-    /// A boolean value indicating whether to consider the planet's constellation (true) or its sign (false).
+    /// A function that maps a planet and its division of the zodiac to a <see cref="PlanetStates"/> value.
     /// </param>
     /// <returns>
     /// A <see cref="PlanetStates"/> value representing the state of the planet based on the provided mapping function.
     /// </returns>
     /// <exception cref="CelestialObjectNotSupportedException">Thrown if the planet is not supported in this chart.</exception>
-    public PlanetStates StateOf(Planets planet, Func<Planets, Zodiac, PlanetStates> statesMap, bool regardingConstellation=false)
+    public PlanetStates StateOf(Planets planet, Func<Planets, Zodiac, PlanetStates> statesMap)
     {
-        return statesMap(planet, regardingConstellation ? ConstellationOf(planet) : SignOf(planet));
+        return statesMap(planet, SignOf(planet));
     }
 }

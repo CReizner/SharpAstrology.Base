@@ -14,13 +14,18 @@ public static class IEphemeridesContextExtensionMethods
     /// </summary>
     /// <param name="planets">The collection of planets for which positions are requested.</param>
     /// <param name="pointInTime">The specific point in time for which positions are requested.</param>
+    /// <param name="mode">
+    /// The zodiac the positions are computed in. The default is the tropical zodiac, which keeps
+    /// this overload compatible with callers written before the parameter existed.
+    /// </param>
     /// <returns>
     /// A dictionary where the key is the planet and the value is its corresponding position
     /// at the specified point in time.
     /// </returns>
     public static Dictionary<Planets, PlanetPosition> PlanetsPosition(this IEphemerides eph,
-        IEnumerable<Planets> planets, DateTime pointInTime)
+        IEnumerable<Planets> planets, DateTime pointInTime,
+        EphCalculationMode mode = EphCalculationMode.Tropic)
     {
-        return planets.ToDictionary(o => o, o => eph.PlanetsPosition(o, pointInTime));
+        return planets.ToDictionary(o => o, o => eph.PlanetsPosition(o, pointInTime, mode));
     }
 }
